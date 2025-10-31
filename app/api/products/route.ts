@@ -4,16 +4,16 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export async function GET() {
+  console.log("💡 DATABASE_URL:", process.env.DATABASE_URL ? "Exists ✅" : "❌ Missing");
   try {
-    const products = await prisma.product.findMany({
-      orderBy: { lastUpdated: "desc" },
-    });
+    const products = await prisma.product.findMany();
     return NextResponse.json(products);
   } catch (error) {
-    console.error("❌ Error fetching products:", error);
+    console.error("❌ Prisma exploded:", error);
     return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
   }
 }
+
 
 export async function POST(req: Request) {
   try {
