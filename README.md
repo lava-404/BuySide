@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Buyside
 
-## Getting Started
+E‑commerce demo built with Next.js App Router, Prisma (MongoDB), and Tailwind.
 
-First, run the development server:
+### Stack
+- Next.js 16 (App Router) + TypeScript
+- React 19
+- Prisma 6 + MongoDB (Atlas or local)
+- Tailwind CSS v4
 
+---
+
+## Quickstart
+
+1) Install deps
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+# or npm i
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2) Configure env
+Create `.env` in the project root:
+```bash
+DATABASE_URL="mongodb+srv://<user>:<pass>@<cluster>/<db>?retryWrites=true&w=majority"
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3) Setup database
+```bash
+npx prisma db push      # create collections/indexes
+npx prisma generate     # generate Prisma Client
+npx prisma db seed      # optional: seed products
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4) Run
+```bash
+npm run dev
+# open http://localhost:3000
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## App Structure
+- `app/` App Router pages and routes
+  - `/` Home
+  - `/products` Product list (client search/add)
+  - `/products/[slug]` Product detail (server + client component)
+  - `/admin` Admin panel (CRUD via API)
+  - `/api/products` REST endpoints (GET, POST)
+  - `/api/products/[id]` REST endpoints (GET, PUT, DELETE)
+- `prisma/schema.prisma` Prisma schema (MongoDB)
+- `prisma/seed.ts` Seed data (uses placehold.co images)
+- `next.config.ts` Remote image domains (placehold.co)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Features
+- Products list with client‑side search/filter and add form
+- Product detail page rendered on the server; client component for interactions
+- Admin panel with create, edit, delete via API
+- Prisma schema for `Product` with unique `slug`
+- Image loading from `placehold.co` (configured in `next.config.ts`)
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Scripts
+```bash
+npm run dev       # start dev server
+npm run build     # production build
+npm start         # start production server
+npm run lint      # lint
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Notes & Troubleshooting
+
+### Prisma
+- If `npx prisma db push` fails with P1013, ensure your `DATABASE_URL` includes a database name (e.g., `/buyside`).
+- After editing `schema.prisma`, run `npx prisma generate` to refresh types.
+
+### Images
+- If you see “next/image unconfigured host”, add the domain to `next.config.ts` `images.remotePatterns`.
+- Project is configured for `placehold.co` and sets `images.unoptimized = true` for local dev.
+
+### Dev Toolbar/Indicators
+- If a Next.js dev indicator shows, it appears only in dev. You can disable via `devIndicators` in `next.config.ts` if desired.
+
+---
+
+## Roadmap (for the assignment)
+- Home `/`: convert to SSG (build‑time fetch) and show products with client search
+- Product `/products/[slug]`: add ISR (`export const revalidate = 60`) + `generateStaticParams`
+- Dashboard `/dashboard`: move to SSR (server component, fetch on each request)
+- Admin `/admin`: already client‑side fetching + forms
+- Bonus: `/recommendations` using React Server Components + small client action
+
+# BuySide
