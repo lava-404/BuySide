@@ -31,7 +31,7 @@ export default function Navbar() {
         <Link href="/admin/dashboard" className="hover:text-gray-900 transition-colors">Dashboard</Link>
         <Link href="/products" className="hover:text-gray-900 transition-colors">Products</Link>
         <Link href="/admin" className="hover:text-gray-900 transition-colors">Admin</Link>
-        <Link href="/settings" className="hover:text-gray-900 transition-colors">Settings</Link>
+        <Link href="" className="hover:text-gray-900 transition-colors">Settings</Link>
       </div>
 
       {/* Right Controls */}
