@@ -33,11 +33,16 @@ export default function ProductsPage() {
       try {
         const res = await fetch('/api/products');
         const data = await res.json();
-        setProducts(data);
+        if (Array.isArray(data)) {
+          setProducts(data);
+        } else {
+          console.error('Unexpected API response:', data);
+          setProducts([]);
+        }
       } catch (err) {
-        console.error(err);
+        console.error('Fetch failed:', err);
       }
-    };
+    };    
     fetchProducts();
   }, []);
 
