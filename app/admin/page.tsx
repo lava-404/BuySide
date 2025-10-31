@@ -22,9 +22,30 @@ interface Product {
   image?: string;
 }
 
+interface FormData {
+  name: string;
+  slug: string;
+  description: string;
+  price: string;
+  category: string;
+  inventory: string;
+  image?: string;
+}
+
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState<FormData>({
+    name: '',
+    slug: '',
+    description: '',
+    price: '',
+    category: '',
+    inventory: '',
+    image: '',
+  });
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   // 🧠 Fetch all products
@@ -69,8 +90,58 @@ export default function ProductsPage() {
     router.push(`/admin/edit/${product.id}`);
   };
 
-  const handleAdd = () => {
-    router.push('/admin/add');
+  const handleAddClick = () => {
+    setShowForm(true);
+  };
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          slug: formData.slug,
+          description: formData.description,
+          price: parseFloat(formData.price),
+          category: formData.category,
+          inventory: parseInt(formData.inventory, 10),
+          image: formData.image || undefined,
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to add product');
+
+      const newProduct = await res.json();
+      setProducts((prev) => [...prev, newProduct]);
+      setShowForm(false);
+      setFormData({
+        name: '',
+        slug: '',
+        description: '',
+        price: '',
+        category: '',
+        inventory: '',
+        image: '',
+      });
+    } catch (err) {
+      console.error('Error adding product:', err);
+      alert('Failed to add product');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -89,12 +160,131 @@ export default function ProductsPage() {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl md:text-3xl font-bold">Products</h1>
           <button
-            onClick={handleAdd}
+            onClick={handleAddClick}
             className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 flex items-center gap-2"
           >
             <Plus size={20} /> Add Product
           </button>
         </div>
+
+        {/* Add Product Form Modal */}
+        {showForm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <h2 className="text-2xl font-bold mb-4">Add New Product</h2>
+              <form onSubmit={handleFormSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Product Name *</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleFormChange}
+                      required
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Enter product name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Slug *</label>
+                    <input
+                      type="text"
+                      name="slug"
+                      value={formData.slug}
+                      onChange={handleFormChange}
+                      required
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="product-slug"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Description *</label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleFormChange}
+                    required
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="Enter product description"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Price *</label>
+                    <input
+                      type="number"
+                      name="price"
+                      value={formData.price}
+                      onChange={handleFormChange}
+                      required
+                      step="0.01"
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Category *</label>
+                    <input
+                      type="text"
+                      name="category"
+                      value={formData.category}
+                      onChange={handleFormChange}
+                      required
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Electronics"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Inventory *</label>
+                    <input
+                      type="number"
+                      name="inventory"
+                      value={formData.inventory}
+                      onChange={handleFormChange}
+                      required
+                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Image URL</label>
+                  <input
+                    type="text"
+                    name="image"
+                    value={formData.image}
+                    onChange={handleFormChange}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    {loading ? 'Adding...' : 'Add Product'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowForm(false)}
+                    className="flex-1 border px-4 py-2 rounded-md hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* Search & Filters */}
         <div className="space-y-4">
