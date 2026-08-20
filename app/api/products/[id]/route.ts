@@ -51,6 +51,9 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const delay = Number(process.env.SIMULATED_DELAY || 0) * 1000;
+    if (delay) await new Promise((r) => setTimeout(r, delay));
+
     // ✅ Properly await params
     const { id } = await context.params;
 

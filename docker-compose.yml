@@ -1,0 +1,41 @@
+# docker-compose.yml
+
+services:
+
+  buyside-1:
+    build: .
+    container_name: buyside-1
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      SERVER_NAME: "Instance 1 (Fast)"
+      SIMULATED_DELAY: "0.05"
+
+  buyside-2:
+    build: .
+    container_name: buyside-2
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      SERVER_NAME: "Instance 2 (Slow)"
+      SIMULATED_DELAY: "0.40"
+
+  buyside-3:
+    build: .
+    container_name: buyside-3
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      SERVER_NAME: "Instance 3 (Medium)"
+      SIMULATED_DELAY: "0.15"
+
+  load-balancer:
+    build:
+      context: .
+      dockerfile: Dockerfile.lb
+    container_name: load-balancer
+    ports:
+      - "8000:8000"
+    environment:
+      STRATEGY: ${STRATEGY:-LC}
+    depends_on:
+      - buyside-1
+      - buyside-2
+      - buyside-3
